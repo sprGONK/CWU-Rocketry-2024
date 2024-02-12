@@ -22,7 +22,7 @@
 #define __MPL3115A2__
 
 #include "Arduino.h"
-#include "Adafruit_I2CDevice.h"
+#include <Adafruit_I2CDevice.h>
 
 #define MPL3115A2_ADDRESS (0x60) ///< default I2C address 1100000
 

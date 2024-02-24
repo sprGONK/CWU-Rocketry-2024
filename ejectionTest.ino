@@ -74,11 +74,13 @@ void IRAM_ATTR eject(){
 
   if(buffer==0x31){
     ignite |= 1; // have permission? set bit 1 high
+    Xbee.write("permission received ";)
   }
   
   if(ignite == 7){ //are all 3 bits high?
     digitalWrite(LED,HIGH);
     digitalWrite(ematch, HIGH);
+    Xbee.write("Ematch ignited ");
   }
   buffer = 0;
 }

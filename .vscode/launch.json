@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "logicTest",
+            "request": "launch",
+            "mainClass": "logicTest",
+            "projectName": "CWU-Rocketry-2024_223bd12b"
+        },
+        {
             "name": "ESP-IDF Debug: Launch",
             "type": "espidf",
             "request": "launch"

@@ -7,6 +7,14 @@
 
 HardwareSerial XBee(2); // UART2
 Adafruit_MPL3115A2 baro; // altimeter
+/* ignite global permission, has 4 checks
+  Primer(ascent), Range, and Permission
+  Primer: checking if rocket is above 1000ft
+  Range: checks if we're in ejection range of 400-550ft only after Primer has happened
+  Permission: checks if we've gotten ground permission
+  */
+int ignite;
+float altitude
 
 void IRAM_ATTR eject(); // GPIO interrupt
 
@@ -36,14 +44,6 @@ void setup()
   // Pasco = 1021 hPa
   baro.setSeaPressure(1013.26);
 }
-/* ignite global permission, has 4 checks
-  Primer(ascent), Range, and Permission
-  Primer: checking if rocket is above 1000ft
-  Range: checks if we're in ejection range of 400-550ft only after Primer has happened
-  Permission: checks if we've gotten ground permission
-  */
-int ignite;
-float altitude
 
 void loop(){
   float pressure = baro.getPressure();
@@ -54,14 +54,17 @@ void loop(){
     ignite |= 4; //above 1000ft? set bit 3 high
   }
   if(ignite >= 4){ // are bits 1 and or 3 high? proceed
-      if(altitude < (550/3.28) && altitude > (400/3.28)){
-        ignite |= 2; // in ejection altitude range? set bit 2 high
-      }
+    if(altitude < (550/3.28) && altitude > (400/3.28)){
+      ignite |= 2; // in ejection altitude range? set bit 2 high
     }
+  }
+  
   XBee.write("Temperature = ");
   Xbee.write((int)temperature);
   Xbee.write("Altitude = ");
   Xbee.write((int)altitude*3.28);
+  Xbee.write("Ignite = ");
+  Xbee.write(ignite);
 }
 
 void IRAM_ATTR eject(){
@@ -73,7 +76,6 @@ void IRAM_ATTR eject(){
     ignite |= 1; // have permission? set bit 1 high
   }
   
-
   if(ignite == 7){ //are all 3 bits high?
     digitalWrite(LED,HIGH);
     digitalWrite(ematch, HIGH);

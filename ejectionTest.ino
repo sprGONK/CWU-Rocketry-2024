@@ -59,12 +59,18 @@ void loop(){
     }
   }
   
+  if(ignite == 7){ //are all 3 bits high? ignite the ematch
+    digitalWrite(LED,HIGH);
+    digitalWrite(ematch, HIGH);
+    XBee.write("Ematch ignited ");
+  }
+
   XBee.write("Temperature = ");
-  Xbee.write((int)temperature);
-  Xbee.write("Altitude = ");
-  Xbee.write((int)altitude*3.28);
-  Xbee.write("Ignite = ");
-  Xbee.write(ignite);
+  XBee.write((int)temperature);
+  XBee.write("Altitude = ");
+  XBee.write((int)altitude*3.28);
+  XBee.write("Ignite = ");
+  XBee.write(ignite);
 }
 
 void IRAM_ATTR eject(){
@@ -74,13 +80,8 @@ void IRAM_ATTR eject(){
 
   if(buffer==0x31){
     ignite |= 1; // have permission? set bit 1 high
-    Xbee.write("permission received ";)
+    XBee.write("permission received ";)
   }
   
-  if(ignite == 7){ //are all 3 bits high?
-    digitalWrite(LED,HIGH);
-    digitalWrite(ematch, HIGH);
-    Xbee.write("Ematch ignited ");
-  }
   buffer = 0;
 }

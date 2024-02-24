@@ -54,12 +54,12 @@ void loop() {
     float temperature = baro.getTemperature();
 
     // If data comes in from serial monitor, send it out to XBee
-        buffer = Serial.read();
-        //XBee.write("Temperature = ");
-        XBee.write((int)temperature);
-        Serial.println((int)temperature);
-        digitalWrite(LED,LOW);
-        buffer = 0;
+    buffer = Serial.read();
+    //XBee.write("Temperature = ");
+    XBee.write((int)temperature);
+    Serial.println((int)temperature);
+    digitalWrite(LED,LOW);
+    buffer = 0;
     
     if (XBee.available())
     { // If data comes in from XBee, send it out to serial monitor

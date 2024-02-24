@@ -3,6 +3,7 @@
 #define RX 16
 #define TX 17
 #define LED 2
+#define command 15
 
 HardwareSerial XBee(2); // UART2
 
@@ -16,6 +17,7 @@ void setup()
   XBee.begin(9600,SERIAL_8N1,RX,TX);
   Serial.begin(9600);
   pinMode(LED,OUTPUT);
+  pinMode(command,OUTPUT);
   attachInterrupt(RX,eject,CHANGE);
 }
 
@@ -24,16 +26,17 @@ int buffer;
 void loop()
 {
   buffer = Serial.read();
-  XBee.write(buffer);
-  digitalWrite(LED,LOW);
+  XBee.write("test");
   Serial.println(buffer, HEX);
   buffer = 0;
+  delay(500);
 }
 
 void IRAM_ATTR eject(){
   buffer = XBee.read();
-  Serial.write(buffer);
-  digitalWrite(LED,!digitalRead(LED));
-  Serial.println(buffer, HEX);
+  if(buffer == 0x31){
+    digitalWrite(LED,!digitalRead(LED));
+    digitalWrite(command,!digitalRead(command));
+  }
   buffer = 0;
 }

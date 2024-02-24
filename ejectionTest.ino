@@ -53,7 +53,11 @@ void loop(){
   if(altitude > 1000/3.28){
     ignite |= 4; //above 1000ft? set bit 3 high
   }
-
+  if(ignite >= 4){ // are bits 1 and or 3 high? proceed
+      if(altitude < (550/3.28) && altitude > (400/3.28)){
+        ignite |= 2; // in ejection altitude range? set bit 2 high
+      }
+    }
   XBee.write("Temperature = ");
   Xbee.write((int)temperature);
   Xbee.write("Altitude = ");
@@ -68,11 +72,7 @@ void IRAM_ATTR eject(){
   if(buffer==0x31){
     ignite |= 1; // have permission? set bit 1 high
   }
-  if(ignite >= 4){ // are bits 1 and or 3 high? proceed
-    if(altitude < (550/3.28) && altitude > (400/3.28)){
-      ignite |= 2; // in ejection altitude range? set bit 2 high
-    }
-  }
+  
 
   if(ignite == 7){ //are all 3 bits high?
     digitalWrite(LED,HIGH);

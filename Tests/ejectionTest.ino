@@ -1,5 +1,6 @@
 // We'll use HardwareSerial to communicate with the XBee:
-#include <HardwareSerial.h>
+#include "HardwareSerial.h"
+#include "Adafruit_MPL3115A2.h"
 #define RX 16
 #define TX 17
 #define LED 2
@@ -13,16 +14,15 @@ Adafruit_MPL3115A2 baro; // altimeter
   Range: checks if we're in ejection range of 400-550ft only after Primer has happened
   Permission: checks if we've gotten ground permission
   */
-int ignite;
-float altitude
+int ignite,baseAltitude;
 
-void IRAM_ATTR eject(); // GPIO interrupt
+void IRAM_ATTR isr();
 
 void setup()
 {
   //setup uart for xbee
   XBee.begin(9600,SERIAL_8N1,RX,TX);
-  attachInterrupt(RX,eject,CHANGE);
+  attachInterrupt(RX,isr,CHANGE);
   //setup GPIO for ematch
   pinMode(LED,OUTPUT);
   pinMode(ematch,OUTPUT);
@@ -43,18 +43,23 @@ void setup()
   // Ellensburg = 1020 hPa
   // Pasco = 1021 hPa
   baro.setSeaPressure(1013.26);
+  baseAltitude = baro.getAltitude()*3.28;
+}
+
+float getCurrentAltitude(){
+  return baro.getAltitude()*3.28 - baseAltitude;
 }
 
 void loop(){
   float pressure = baro.getPressure();
-  altitude = baro.getAltitude();
+  float altitude = getCurrentAltitude();
   float temperature = baro.getTemperature();
 
-  if(altitude > 1000/3.28){
+  if(altitude > 1000){
     ignite |= 4; //above 1000ft? set bit 3 high
   }
   if(ignite >= 4){ // are bits 1 and or 3 high? proceed
-    if(altitude < (550/3.28) && altitude > (400/3.28)){
+    if((altitude < 550) && (altitude > 400)){
       ignite |= 2; // in ejection altitude range? set bit 2 high
     }
   }
@@ -68,19 +73,27 @@ void loop(){
   XBee.write("Temperature = ");
   XBee.write((int)temperature);
   XBee.write("Altitude = ");
-  XBee.write((int)altitude*3.28);
+  XBee.write((int)altitude);
   XBee.write("Ignite = ");
   XBee.write(ignite);
+  /*
+  Serial.print("Temperature = ");
+  Serial.print((int)temperature);
+  Serial.print("Altitude = ");
+  Serial.print((int)altitude);
+  Serial.print("Ignite = ");
+  Serial.print(ignite);
+  */
 }
 
-void IRAM_ATTR eject(){
+void IRAM_ATTR isr(){
   int buffer;  
 
   buffer = XBee.read();
 
   if(buffer==0x31){
     ignite |= 1; // have permission? set bit 1 high
-    XBee.write("permission received ";)
+    XBee.write("permission received ");
   }
   
   buffer = 0;

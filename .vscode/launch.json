@@ -8,6 +8,13 @@
             "type": "java",
             "name": "logicTest",
             "request": "launch",
+            "mainClass": "Tests.logicTest",
+            "projectName": "CWU-Rocketry-2024_223bd12b"
+        },
+        {
+            "type": "java",
+            "name": "logicTest",
+            "request": "launch",
             "mainClass": "logicTest",
             "projectName": "CWU-Rocketry-2024_223bd12b"
         },

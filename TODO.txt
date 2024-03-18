@@ -12,3 +12,5 @@ Arduino IDE
 esp32 library from Arduino library
 Arduino extension from vscode
 esp32 extension from vscode
+
+Just google things like "arduino esp32 bluetooth" or "arduino esp32 sd card" to figure out how to implement things like that

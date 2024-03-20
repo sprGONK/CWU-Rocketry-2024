@@ -29,6 +29,7 @@ String device_name = "ESP32-BT-Slave";
 #endif
 
 BluetoothSerial SerialBTS;
+Adafruit_MPL3115A2 baro;
 
 /* ignite global permission, has 4 checks
   Primer(ascent), Range, and Permission

@@ -37,8 +37,6 @@ void setup()
     Serial.println("error opening test.txt");
   }
 }
-
-// THIS IS AN ADDITION THAT IS A TEST
  
 void loop()
 {

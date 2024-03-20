@@ -10,15 +10,40 @@ add MS5607
 
 #include <Wire.h>
 #include <math.h> 
+#include <string.h>
 #include "HardwareSerial.h"
+#include "BluetoothSerial.h"
+//UART2 Pins
 #define RX 16
 #define TX 17
+//SPI Pins
+#define SS 5
+#define SCK 18
+#define MISO 19
+#define MOSI 23
+
+#define USE_NAME // Comment this to use MAC address instead of a slaveName
+const char *pin = "1234"; // Change this to reflect the pin expected by the real slave BT device
+
+#if !defined(CONFIG_BT_SPP_ENABLED)
+#error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
+#endif
+
 const int MPU=0x68; 
 int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
 bool permission
 double pitch,roll;
+String myName = "ESP32-BT-Master";
 
 HardwareSerial XBee(2); // UART2
+BluetoothSerial SerialBTM;
+
+#ifdef USE_NAME
+  String slaveName = "ESP32-BT-Slave"; // Change this to reflect the real name of your slave BT device
+#else
+  String MACadd = "AA:BB:CC:11:22:33"; // This only for printing
+  uint8_t address[6]  = {0xAA, 0xBB, 0xCC, 0x11, 0x22, 0x33}; // Change this to reflect real MAC address of your slave BT device
+#endif
 
 void setup(){
     //accelerometer setup
@@ -27,13 +52,51 @@ void setup(){
   Wire.write(0x6B); 
   Wire.write(0);    
   Wire.endTransmission(true);
-  Serial.begin(9600);
+  Serial.begin(115200);
 
     //setup UART2 for xbee
-  XBee.begin(9600,SERIAL_8N1,RX,TX);
+  XBee.begin(115200,SERIAL_8N1,RX,TX);
   attachInterrupt(RX,isr,CHANGE);
 
   //Bluetooth setup
+  bool connected;
+  SerialBTM.begin(myName, true);
+  #ifndef USE_NAME
+    SerialBTM.setPin(pin);
+    Serial.println("Using PIN");
+  #endif
+
+  // connect(address) is fast (up to 10 secs max), connect(slaveName) is slow (up to 30 secs max) as it needs
+  // to resolve slaveName to address first, but it allows to connect to different devices with the same name.
+  // Set CoreDebugLevel to Info to view devices Bluetooth address and device names
+  #ifdef USE_NAME
+    connected = SerialBTM.connect(slaveName);
+    Serial.printf("Connecting to slave BT device named \"%s\"\n", slaveName.c_str());
+  #else
+    connected = SerialBTM.connect(address);
+    Serial.print("Connecting to slave BT device with MAC "); Serial.println(MACadd);
+  #endif
+
+  if(connected) {
+    Serial.println("Connected Successfully!");
+  } else {
+    while(!SerialBTM.connected(10000)) {
+      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
+    }
+  }
+  // Disconnect() may take up to 10 secs max
+  if (SerialBTM.disconnect()) {
+    Serial.println("Disconnected Successfully!");
+  }
+  // This would reconnect to the slaveName(will use address, if resolved) or address used with connect(slaveName/address).
+  SerialBTM.connect();
+  if(connected) {
+    Serial.println("Reconnected Successfully!");
+  } else {
+    while(!SerialBTM.connected(10000)) {
+      Serial.println("Failed to reconnect. Make sure remote device is available and in range, then restart app.");
+    }
+  }
   //MS5607 setup
   //SD setup
 }
@@ -41,6 +104,11 @@ void setup(){
 void loop(){
     int[] accel = new int[7]; //possibly wrong syntax
     accel = readAccelerometer();
+
+    if(permission){
+      //send permission to Upper
+
+    }
   
 }
 

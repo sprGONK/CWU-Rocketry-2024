@@ -49,7 +49,7 @@
                 "c:\\users\\gonk\\appdata\\local\\arduino15\\packages\\esp32\\tools\\**"
             ],
             "forcedInclude": [
-                "C:\\Users\\natha\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\cores\\esp32\\Arduino.h"
+                "C:\\Users\\gonk\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\cores\\esp32\\Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",

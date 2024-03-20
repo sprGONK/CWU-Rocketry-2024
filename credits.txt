@@ -1,0 +1,4 @@
+Credits for code used
+https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/arduino-library
+https://github.com/adafruit/Adafruit_BusIO
+https://github.com/adafruit/Adafruit_MPU6050

@@ -13,6 +13,7 @@ add MS5607
 #include <string.h>
 #include "HardwareSerial.h"
 #include "BluetoothSerial.h"
+#include "Adafruit_MPU6050.h"
 //UART2 Pins
 #define RX 16
 #define TX 17
@@ -36,7 +37,8 @@ double pitch,roll;
 String myName = "ESP32-BT-Master";
 
 HardwareSerial XBee(2); // UART2
-BluetoothSerial SerialBTM;
+BluetoothSerial SerialBTM; // Bluetooth channel
+Adafruit_MPU6050 mpu;
 
 #ifdef USE_NAME
   String slaveName = "ESP32-BT-Slave"; // Change this to reflect the real name of your slave BT device
@@ -45,6 +47,8 @@ BluetoothSerial SerialBTM;
   uint8_t address[6]  = {0xAA, 0xBB, 0xCC, 0x11, 0x22, 0x33}; // Change this to reflect real MAC address of your slave BT device
 #endif
 
+void IRAM_ATTR ISR();
+
 void setup(){
     //accelerometer setup
   Wire.begin();
@@ -52,7 +56,11 @@ void setup(){
   Wire.write(0x6B); 
   Wire.write(0);    
   Wire.endTransmission(true);
+
+
+
   Serial.begin(115200);
+
 
     //setup UART2 for xbee
   XBee.begin(115200,SERIAL_8N1,RX,TX);
@@ -107,7 +115,7 @@ void loop(){
 
     if(permission){
       //send permission to Upper
-
+      SerialBTM.write(0x31);
     }
   
 }

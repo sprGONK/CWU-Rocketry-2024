@@ -1,11 +1,13 @@
 // Code taken from https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/arduino-library
 #include "SD.h"
 #define SS 5
-#define sdFileName "/flightData_3-20-24.json"
+#define sdFileName "/flightData_3-21-24.csv"
+#define csvDataStructure "Time, Altitude, Temperature, Pressure" // Maybe add accelerometer data?
 File myFile;
+
 // Variables for timer after launch started
 unsigned long startTime = 0;
-unsigned long timeInterval = 1000; // Will record data every 
+unsigned long timeInterval = 100; // Will record data every 100 ms
  
 void setup()
 {
@@ -55,9 +57,12 @@ void setup()
 
     myFile = SD.open(sdFileName, FILE_WRITE);
 
+    myFile.print(csvDataStructure);
+
     // Close the file after writing initial data
     myFile.close();
-    Serial.println(sdFileName + " Created");
+    Serial.print(sdFileName);
+    Serial.println(" Created");
 
 	startTime = millis(); // Start the timer
   }
@@ -69,25 +74,23 @@ void loop()
 	myFile = SD.open(sdFileName, FILE_APPEND);
 
 	if (!myFile) {
-		Serial.println("Error opening " + sdFileName);
+		Serial.print("Error opening ");
+    Serial.println(sdFileName);
 	} else {
 		// Calculate the current time based on the elapsed time since the start
-		unsigned long currentTime = ((millis() - startTime) / 1000);
+		unsigned long currentTime = millis() - startTime;
 
 		// Add JSON data for the current time slot
-		myFile.println("{");
-		myFile.print("    \"");
 		myFile.print(String(currentTime));
-		myFile.println("\": {");
-		myFile.println("        \"altitude\": \"100 meters\",");
-		myFile.println("        \"pressure\": \"1013.25 hPa\",");
-		myFile.println("        \"temperature\": \"25°C\"");
-		myFile.print("    }");
+		myFile.print(String(2045));          // Replace with variable name for altitude
+		myFile.print(String(23));            // Replace with variable name for temperature
+		myFile.print(String(1023.5));        // Replace with variable name for pressure
 		myFile.println();
 
 		// Close the file after appending data
 		myFile.close();
-		Serial.println("Data appended to " + sdFileName);
+		Serial.print("Data appended to ");
+    Serial.println(sdFileName);
 
 		delay(timeInterval);
 	}

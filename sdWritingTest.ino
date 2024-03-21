@@ -55,6 +55,12 @@ void setup()
   } else {
     Serial.println("initialization done.");
 
+    // If the file exists, remove it
+    if(SD.exists(sdFileName) == 1) {
+      SD.remove(sdFileName);
+    }
+    
+    // Create the file
     myFile = SD.open(sdFileName, FILE_WRITE);
 
     myFile.println(csvDataStructure);

@@ -14,6 +14,7 @@ add MS5607
 #include "HardwareSerial.h"
 #include "BluetoothSerial.h"
 #include "Adafruit_MPU6050.h"
+#include "SD.h"
 //UART2 Pins
 #define RX 16
 #define TX 17
@@ -23,10 +24,8 @@ add MS5607
 #define MISO 19
 #define MOSI 23
 // SD Card Reader
-#include "SD.h"
-#define SS 5
 #define sdFileName "/flightData_3-20-24.json"
-File myFile;
+
 
 #define USE_NAME // Comment this to use MAC address instead of a slaveName
 const char *pin = "1234"; // Change this to reflect the pin expected by the real slave BT device
@@ -35,10 +34,8 @@ const char *pin = "1234"; // Change this to reflect the pin expected by the real
 #error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
 #endif
 
-const int MPU=0x68; 
-int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
+File myFile;
 bool permission
-double pitch,roll;
 String myName = "ESP32-BT-Master";
 
 HardwareSerial XBee(2); // UART2
@@ -55,21 +52,32 @@ Adafruit_MPU6050 mpu;
 void IRAM_ATTR ISR();
 
 void setup(){
-    //accelerometer setup
-  Wire.begin();
-  Wire.beginTransmission(MPU);
-  Wire.write(0x6B); 
-  Wire.write(0);    
-  Wire.endTransmission(true);
-
-
-
+  //accelerometer setup
   Serial.begin(115200);
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 
 
-    //setup UART2 for xbee
+  //setup UART2 for xbee
   XBee.begin(115200,SERIAL_8N1,RX,TX);
   attachInterrupt(RX,isr,CHANGE);
+  //SD setup
+  Serial.print("Initializing SD card...");
+  pinMode(SS, OUTPUT);
+ 
+  // Verify connection was made
+  if (!SD.begin(SS)) {
+    Serial.println("initialization failed!");
+  } else {
+    Serial.println("initialization done.");
+
+    myFile = SD.open(sdFileName, FILE_WRITE);
+
+    // Close the file after writing initial data
+    myFile.close();
+    Serial.println(sdFileName + " Created");
+  }
 
   //Bluetooth setup
   bool connected;
@@ -111,92 +119,18 @@ void setup(){
     }
   }
   //MS5607 setup
-  //SD setup
-  Serial.print("Initializing SD card...");
-  
-  // Setup 
-  pinMode(SS, OUTPUT);
- 
-  // Verify connection was made
-  if (!SD.begin(SS)) {
-    Serial.println("initialization failed!");
-  } else {
-    Serial.println("initialization done.");
 
-    myFile = SD.open(sdFileName, FILE_WRITE);
-
-    // Close the file after writing initial data
-    myFile.close();
-    Serial.println(sdFileName + " Created");
-  }
 }
 
 void loop(){
-    int[] accel = new int[7]; //possibly wrong syntax
-    accel = readAccelerometer();
-
-    if(permission){
-      //send permission to Upper
-      SerialBTM.write(0x31);
-    }
+  if(permission){
+    //send permission to Upper
+    SerialBTM.write(0x31);
+  }
   
-}
-
-int[] readAccelerometer(){
-    Wire.beginTransmission(MPU);
-  Wire.write(0x3B);  
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU,14,true);  
-  
-  int AcXoff,AcYoff,AcZoff,GyXoff,GyYoff,GyZoff;
-  int temp,toff;
-  double t,tx,tf;
-  
-//Acceleration data correction
-  AcXoff = -950;
-  AcYoff = -300;
-  AcZoff = 0;
-
-//Temperature correction
-  toff = -1600;
-
-//Gyro correction
-  GyXoff = 480;
-  GyYoff = 170;
-  GyZoff = 210;
-
-//read accel data  
-  AcX=(Wire.read()<<8|Wire.read()) + AcXoff;    
-  AcY=(Wire.read()<<8|Wire.read()) + AcYoff;  
-  AcZ=(Wire.read()<<8|Wire.read()) + AcYoff;  
-
-//read temperature data
-  temp=(Wire.read()<<8|Wire.read()) + toff;  
-  tx=temp;
-  t = tx/340 + 36.53;
-  tf = (t * 9/5) + 32; //temperature fahrenheit
-
-//read gyro data
-  GyX=(Wire.read()<<8|Wire.read()) + GyXoff;  
-  GyY=(Wire.read()<<8|Wire.read()) + GyYoff;  
-  GyZ=(Wire.read()<<8|Wire.read()) + GyZoff;  
-    
-//get pitch/roll
-  getAngle(AcX,AcY,AcZ);
-  return [AcX, AcY, AcZ, tf, GyX, GyY, GyZ]; //probably wrong syntax
-}
-
-//convert the accel data to pitch/roll
-void getAngle(int Vx,int Vy,int Vz) {
-    double x = Vx;
-    double y = Vy;
-    double z = Vz;
-
-    pitch = atan(x/sqrt((y*y) + (z*z)));
-    roll = atan(y/sqrt((x*x) + (z*z)));
-    //convert radians into degrees
-    pitch = pitch * (180.0/3.14);
-    roll = roll * (180.0/3.14) ;
+  /* Get new sensor events with the readings */
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
 }
 
 void IRAM_ATTR ISR(){

@@ -155,9 +155,9 @@ boolean writeDataToSD(){
 
 		// Add JSON data for the current time slot
 		myFile.print(String(currentTime));
-		myFile.print(String(""));          // Replace with variable name for altitude
-		myFile.print(String(""));            // Replace with variable name for temperature
-		myFile.print(String(""));        // Replace with variable name for pressure
+		myFile.print(String(""));             // Replace with variable name for altitude
+		myFile.print(String(""));             // Replace with variable name for temperature
+		myFile.print(String(""));             // Replace with variable name for pressure
 		myFile.println();
 
 		// Close the file after appending data

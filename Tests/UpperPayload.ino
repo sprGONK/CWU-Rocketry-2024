@@ -74,7 +74,7 @@ void setup()
     Serial.println("Using PIN");
   #endif
 
-  if(!SerialBTS.available()){
+  while(!SerialBTS.available()){
     //sit here until something is received, should save power ? ?
   }
 }

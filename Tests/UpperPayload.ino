@@ -40,12 +40,10 @@ Adafruit_MPL3115A2 baro;
 int ignite;
 float baseAltitude;
 
-void IRAM_ATTR isr();
 float getCurrentAltitude();
 
 void setup()
 {
-
   //setup GPIO for ematch
   pinMode(LED,OUTPUT);
   pinMode(ematch,OUTPUT);
@@ -74,12 +72,18 @@ void setup()
     Serial.println("Using PIN");
   #endif
 
-  if(!SerialBTS.available()){
+  /* if(!SerialBTS.available()){
     //sit here until something is received, should save power ? ?
-  }
+  } */
 }
 
 void loop(){
+  if(SerialBTS.available()){
+    if(SerialBTS.read()==0x31){
+      ignite |= 1;
+    }
+  }
+
   float pressure = baro.getPressure();
   float altitude = getCurrentAltitude();
   float temperature = baro.getTemperature();

@@ -55,9 +55,9 @@ void IRAM_ATTR ISR();
 void setup(){
   //accelerometer setup
   Serial.begin(115200);
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 
 
   //setup UART2 for xbee
@@ -165,7 +165,7 @@ boolean writeDataToSD(){
 		Serial.print("Data appended to ");
     Serial.println(sdFileName);
     return true;
-
+  }
 }
 
 void IRAM_ATTR ISR(){

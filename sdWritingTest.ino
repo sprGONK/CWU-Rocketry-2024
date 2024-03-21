@@ -57,8 +57,7 @@ void setup()
 
     // Close the file after writing initial data
     myFile.close();
-    Serial.print(sdFileName); 
-    Serial.println(" Created");
+    Serial.println(sdFileName + " Created");
 
 	startTime = millis(); // Start the timer
   }
@@ -70,8 +69,7 @@ void loop()
 	myFile = SD.open(sdFileName, FILE_APPEND);
 
 	if (!myFile) {
-		Serial.print("Error opening ");
-    Serial.println(sdFileName);
+		Serial.println("Error opening " + sdFileName);
 	} else {
 		// Calculate the current time based on the elapsed time since the start
 		unsigned long currentTime = ((millis() - startTime) / 1000);
@@ -89,8 +87,8 @@ void loop()
 
 		// Close the file after appending data
 		myFile.close();
-		Serial.print("Data appended to ");
-    Serial.println(sdFileName);
+		Serial.println("Data appended to " + sdFileName);
+
 		delay(timeInterval);
 	}
 }

@@ -24,7 +24,7 @@ add MS5607
 #define MISO 19
 #define MOSI 23
 // SD Card Reader
-#define sdFileName "/flightData_3-21-24.csv"
+#define sdFileName "/payloadFlightData_3-21-24.csv"
 #define csvDataStructure "Time, Altitude, Temperature, Pressure" // Order is important, otherwise there will confusion of data
 unsigned long sdDataStartTime = 0;
 

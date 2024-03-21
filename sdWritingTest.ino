@@ -57,7 +57,7 @@ void setup()
 
     myFile = SD.open(sdFileName, FILE_WRITE);
 
-    myFile.print(csvDataStructure);
+    myFile.println(csvDataStructure);
 
     // Close the file after writing initial data
     myFile.close();
@@ -82,9 +82,12 @@ void loop()
 
 		// Add JSON data for the current time slot
 		myFile.print(String(currentTime));
+    myFile.print(",");
 		myFile.print(String(2045));          // Replace with variable name for altitude
-		myFile.print(String(23));            // Replace with variable name for temperature
-		myFile.print(String(1023.5));        // Replace with variable name for pressure
+		myFile.print(",");
+    myFile.print(String(23));            // Replace with variable name for temperature
+		myFile.print(",");
+    myFile.print(String(1023.5));        // Replace with variable name for pressure
 		myFile.println();
 
 		// Close the file after appending data

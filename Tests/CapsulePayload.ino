@@ -4,7 +4,7 @@ not sure where I want to add SD card, probably in here
 TODO:
 add bluetooth
 add active/sleep modes controlled by XBee
-add SD card (in progress) Maybe add accelerometer data to be saved to this?
+add SD card (done) Maybe add accelerometer data to be saved to this?
 add MS5607
 */
 

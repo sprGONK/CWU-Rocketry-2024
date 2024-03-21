@@ -3,7 +3,7 @@ active and sleep states for MCUs [esp32 devkitv1]
 Bluetooth between MCUs [esp32 devkitv1]
 Accelerometer using I2C (done but not working) [mpu6050]
 Barometer/thermometer using SPI [ms5607]
-SD card write sensor data to .txt using SPI
+SD card write sensor data to .txt using SPI (wrote to csv but done)
 figure out how to do active/sleep state control with bluetooth
 possibly move from XCTU and develop personal code to be ran on laptop. Would involve USB2UART conversion
 

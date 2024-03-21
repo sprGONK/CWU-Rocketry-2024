@@ -102,5 +102,8 @@ void loop()
     Serial.println(sdFileName);
 
 		delay(timeInterval);
+    if(currentTime > 10000) {
+      return;
+    }
 	}
 }

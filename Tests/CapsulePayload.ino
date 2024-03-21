@@ -22,6 +22,11 @@ add MS5607
 #define SCK 18
 #define MISO 19
 #define MOSI 23
+// SD Card Reader
+#include "SD.h"
+#define SS 5
+#define sdFileName "/flightData_3-20-24.json"
+File myFile;
 
 #define USE_NAME // Comment this to use MAC address instead of a slaveName
 const char *pin = "1234"; // Change this to reflect the pin expected by the real slave BT device
@@ -107,6 +112,23 @@ void setup(){
   }
   //MS5607 setup
   //SD setup
+  Serial.print("Initializing SD card...");
+  
+  // Setup 
+  pinMode(SS, OUTPUT);
+ 
+  // Verify connection was made
+  if (!SD.begin(SS)) {
+    Serial.println("initialization failed!");
+  } else {
+    Serial.println("initialization done.");
+
+    myFile = SD.open(sdFileName, FILE_WRITE);
+
+    // Close the file after writing initial data
+    myFile.close();
+    Serial.println(sdFileName + " Created");
+  }
 }
 
 void loop(){

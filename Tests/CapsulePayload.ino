@@ -4,7 +4,7 @@ not sure where I want to add SD card, probably in here
 TODO:
 add bluetooth
 add active/sleep modes controlled by XBee
-add SD card
+add SD card (in progress) Maybe add accelerometer data to be saved to this?
 add MS5607
 */
 
@@ -24,8 +24,9 @@ add MS5607
 #define MISO 19
 #define MOSI 23
 // SD Card Reader
-#define sdFileName "/flightData_3-20-24.json"
-
+#define sdFileName "/flightData_3-21-24.csv"
+#define csvDataStructure "Time, Altitude, Temperature, Pressure" // Order is important, otherwise there will confusion of data
+unsigned long sdDataStartTime = 0;
 
 #define USE_NAME // Comment this to use MAC address instead of a slaveName
 const char *pin = "1234"; // Change this to reflect the pin expected by the real slave BT device
@@ -72,11 +73,16 @@ void setup(){
   } else {
     Serial.println("initialization done.");
 
+    // Open File
     myFile = SD.open(sdFileName, FILE_WRITE);
+
+    // Write structure of file into file first
+    myFile.print(csvDataStructure);
 
     // Close the file after writing initial data
     myFile.close();
-    Serial.println(sdFileName + " Created");
+    Serial.print(sdFileName);
+    Serial.println(" Created");
   }
 
   //Bluetooth setup
@@ -131,6 +137,35 @@ void loop(){
   /* Get new sensor events with the readings */
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
+
+  writeDataToSD()
+}
+
+boolean writeDataToSD(){
+  // Open the JSON file in append mode
+	myFile = SD.open(sdFileName, FILE_APPEND);
+
+	if (!myFile) {
+		Serial.print("Error opening ");
+    Serial.println(sdFileName);
+    return false;
+	} else {
+		// Calculate the current time based on the elapsed time since the start
+		unsigned long currentTime = millis() - startTime;
+
+		// Add JSON data for the current time slot
+		myFile.print(String(currentTime));
+		myFile.print(String(""));          // Replace with variable name for altitude
+		myFile.print(String(""));            // Replace with variable name for temperature
+		myFile.print(String(""));        // Replace with variable name for pressure
+		myFile.println();
+
+		// Close the file after appending data
+		myFile.close();
+		Serial.print("Data appended to ");
+    Serial.println(sdFileName);
+    return true;
+
 }
 
 void IRAM_ATTR ISR(){

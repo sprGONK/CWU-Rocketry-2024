@@ -140,16 +140,18 @@ void setup(){
 }
 
 void loop(){
-  if(permission){
-    //send permission to Upper
-    SerialBTM.write(0x31);
-  }
-  
-  /* Get new sensor events with the readings */
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
+  if(/*currentAltitude*/ > 100) {
+    if(permission){
+      //send permission to Upper
+      SerialBTM.write(0x31);
+    }
 
-  writeDataToSD()
+    /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    writeDataToSD()
+  }
 }
 
 boolean writeDataToSD(){

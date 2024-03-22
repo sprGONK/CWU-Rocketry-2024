@@ -27,6 +27,8 @@ add MS5607
 #define sdFileName "/payloadFlightData_3-21-24.csv"
 #define csvDataStructure "Time, Altitude, Temperature, Pressure" // Order is important, otherwise there will confusion of data
 unsigned long sdDataStartTime = 0;
+// LED Light
+#define LED 2 //GPIO 2 is onboard LED
 
 #define USE_NAME // Comment this to use MAC address instead of a slaveName
 const char *pin = "1234"; // Change this to reflect the pin expected by the real slave BT device
@@ -38,6 +40,7 @@ const char *pin = "1234"; // Change this to reflect the pin expected by the real
 File myFile;
 bool permission
 String myName = "ESP32-BT-Master";
+bool connected; // Variable for whether or not the bluetooth is connected
 
 HardwareSerial XBee(2); // UART2
 BluetoothSerial SerialBTM; // Bluetooth channel
@@ -53,6 +56,9 @@ Adafruit_MPU6050 mpu;
 void IRAM_ATTR ISR();
 
 void setup(){
+  // LED Setup
+  pinMode(LED,OUTPUT);
+
   //accelerometer setup
   Serial.begin(115200);
   mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
@@ -63,6 +69,7 @@ void setup(){
   //setup UART2 for xbee
   XBee.begin(115200,SERIAL_8N1,RX,TX);
   attachInterrupt(RX,isr,CHANGE);
+
   //SD setup
   Serial.print("Initializing SD card...");
   pinMode(SS, OUTPUT);
@@ -77,7 +84,7 @@ void setup(){
     myFile = SD.open(sdFileName, FILE_WRITE);
 
     // Write structure of file into file first
-    myFile.print(csvDataStructure);
+    myFile.println(csvDataStructure);
 
     // Close the file after writing initial data
     myFile.close();
@@ -86,7 +93,6 @@ void setup(){
   }
 
   //Bluetooth setup
-  bool connected;
   SerialBTM.begin(myName, true);
   #ifndef USE_NAME
     SerialBTM.setPin(pin);
@@ -106,22 +112,27 @@ void setup(){
 
   if(connected) {
     Serial.println("Connected Successfully!");
+    digitalWrite(LED,HIGH);
   } else {
     while(!SerialBTM.connected(10000)) {
       Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
+      digitalWrite(LED,LOW);
     }
   }
   // Disconnect() may take up to 10 secs max
   if (SerialBTM.disconnect()) {
     Serial.println("Disconnected Successfully!");
+    digitalWrite(LED,LOW);
   }
   // This would reconnect to the slaveName(will use address, if resolved) or address used with connect(slaveName/address).
   SerialBTM.connect();
   if(connected) {
     Serial.println("Reconnected Successfully!");
+    digitalWrite(LED,HIGH);
   } else {
     while(!SerialBTM.connected(10000)) {
       Serial.println("Failed to reconnect. Make sure remote device is available and in range, then restart app.");
+      digitalWrite(LED,LOW);
     }
   }
   //MS5607 setup
@@ -155,9 +166,14 @@ boolean writeDataToSD(){
 
 		// Add JSON data for the current time slot
 		myFile.print(String(currentTime));
+    myFile.print(",");
 		myFile.print(String(""));             // Replace with variable name for altitude
+    myFile.print(",");
 		myFile.print(String(""));             // Replace with variable name for temperature
+    myFile.print(",");
 		myFile.print(String(""));             // Replace with variable name for pressure
+    myFile.print(",");
+    myFile.print(String(connected));
 		myFile.println();
 
 		// Close the file after appending data

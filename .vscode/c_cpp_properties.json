@@ -7,8 +7,8 @@
             "intelliSenseMode": "windows-gcc-x64",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Users/gonk/OneDrive - Central Washington University/CWU/Snr Proj/CWU-Rocketry-2024/libraries/**",
-                "C:/Users/gonk/AppData/Local/Arduino15/**"
+                "C:/Users/natha/OneDrive - Central Washington University/CWU/Snr Proj/CWU-Rocketry-2024/libraries/**",
+                "C:/Users/natha/AppData/Local/Arduino15/**"
             ],
             "forcedInclude": [],
             "cStandard": "c17",

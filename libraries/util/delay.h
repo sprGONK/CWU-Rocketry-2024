@@ -42,7 +42,7 @@
 #endif  /* __DOXYGEN__ */
 
 #include <inttypes.h>
-#include <util/delay_basic.h>
+#include "delay_basic.h"
 #include <math.h>
 
 /** \file */

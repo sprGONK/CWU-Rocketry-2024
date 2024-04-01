@@ -24,8 +24,8 @@ add MS5607
 #define MISO 19
 #define MOSI 23
 // SD Card Reader
-#define sdFileName "/payloadFlightData_3-21-24.csv"
-#define csvDataStructure "Time, Altitude, Temperature, Pressure" // Order is important, otherwise there will confusion of data
+#define sdFileName "/payloadFlightData_3-22-24.csv"
+#define csvDataStructure "Time, Altitude, Temperature, G-Force, Connected" // Order is important, otherwise there will confusion of data
 unsigned long sdDataStartTime = 0;
 // LED Light
 #define LED 2 //GPIO 2 is onboard LED
@@ -38,9 +38,10 @@ const char *pin = "1234"; // Change this to reflect the pin expected by the real
 #endif
 
 File myFile;
-bool permission
+bool permission;
 String myName = "ESP32-BT-Master";
 bool connected; // Variable for whether or not the bluetooth is connected
+int altitude;
 
 HardwareSerial XBee(2); // UART2
 BluetoothSerial SerialBTM; // Bluetooth channel
@@ -54,6 +55,9 @@ Adafruit_MPU6050 mpu;
 #endif
 
 void IRAM_ATTR ISR();
+float getTemperature();
+int getAltitude();
+float getGForce();
 
 void setup(){
   // LED Setup
@@ -68,7 +72,7 @@ void setup(){
 
   //setup UART2 for xbee
   XBee.begin(115200,SERIAL_8N1,RX,TX);
-  attachInterrupt(RX,isr,CHANGE);
+  attachInterrupt(RX,ISR,CHANGE);
 
   //SD setup
   Serial.print("Initializing SD card...");
@@ -140,17 +144,14 @@ void setup(){
 }
 
 void loop(){
-  if(/*currentAltitude*/ > 100) {
+  altitude = getAltitude();
+  if(1) {
     if(permission){
       //send permission to Upper
       SerialBTM.write(0x31);
     }
 
-    /* Get new sensor events with the readings */
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-
-    writeDataToSD()
+    writeDataToSD();
   }
 }
 
@@ -164,16 +165,16 @@ boolean writeDataToSD(){
     return false;
 	} else {
 		// Calculate the current time based on the elapsed time since the start
-		unsigned long currentTime = millis() - startTime;
+		unsigned long currentTime = millis() - sdDataStartTime;
 
 		// Add JSON data for the current time slot
 		myFile.print(String(currentTime));
     myFile.print(",");
-		myFile.print(String(""));             // Replace with variable name for altitude
+		myFile.print(String(getAltitude()));             // Replace with variable name for altitude
     myFile.print(",");
-		myFile.print(String(""));             // Replace with variable name for temperature
+		myFile.print(String(getTemperature()));             // Replace with variable name for temperature
     myFile.print(",");
-		myFile.print(String(""));             // Replace with variable name for pressure
+		myFile.print(String(getGForce()));             // Replace with variable name for gForce
     myFile.print(",");
     myFile.print(String(connected));
 		myFile.println();
@@ -184,6 +185,31 @@ boolean writeDataToSD(){
     Serial.println(sdFileName);
     return true;
   }
+}
+
+float getGForce(){
+  float gs;
+  /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+  gs = sqrt((a.acceleration.x*a.acceleration.x)+(a.acceleration.y*a.acceleration.y)+(a.acceleration.z*a.acceleration.z));
+  return gs;
+}
+
+float getTemperature(){
+    /* Get new sensor events with the readings */
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    return temp.temperature;
+}
+
+int getAltitude(){
+  if(SerialBTM.available()){
+    altitude = SerialBTM.read();
+  }
+  return altitude;
 }
 
 void IRAM_ATTR ISR(){

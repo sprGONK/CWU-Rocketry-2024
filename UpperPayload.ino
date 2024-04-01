@@ -14,6 +14,7 @@ add active/sleep modes controlled by bluetooth (not sure how I want to accomplis
 #define RX 16
 #define TX 17
 #define LED 2
+#define ematch 15
 
 //#define USE_PIN // Uncomment this to use PIN during pairing. The pin is specified on the line below
 const char *pin = "1234"; // Change this to more secure PIN.
@@ -45,49 +46,62 @@ float getCurrentAltitude();
 
 void setup()
 {
-
+  delay(5000);
   //setup GPIO for ematch
   pinMode(LED,OUTPUT);
   pinMode(ematch,OUTPUT);
 
   //setup altimeter
-  Serial.begin(115200);
+  Serial.begin(9600);
   while(!Serial);
   Serial.println("Adafruit_MPL3115A2 test!");
 
   if (!baro.begin()) {
     Serial.println("Could not find sensor. Check wiring.");
-    while(1);
+    while(1){
+      Serial.println("FUck you");
+    }
   }
   // use to set sea level pressure for current location
   // this is needed for accurate altitude measurement
   // STD SLP = 1013.26 hPa
   // Note: 1 hPa = 1 mbar
   // Ellensburg = 1020 hPa Pasco = 1021 hPa
-  baro.setSeaPressure(1013.26);
+  baro.setSeaPressure(1019.0);
   baseAltitude = baro.getAltitude()*3.28;
 
+  ignite = 1; //hard set permission
+
   //setup Bluetooth
-  SerialBTS.begin(device_name); //Bluetooth device name
+  SerialBTS.begin(device_name);
+  Serial.println("Bluetooth is on"); //Bluetooth device name
   #ifdef USE_PIN
     SerialBTS.setPin(pin);
     Serial.println("Using PIN");
   #endif
 
-  while(!SerialBTS.available()){
+  /* while(!SerialBTS.available()){
     //sit here until something is received, should save power ? ?
-  }
+  } */
 }
 
 void loop(){
+  Serial.println("I'm working");
+  if(SerialBTS.available()){
+    if(SerialBTS.read()==0x31){
+      ignite |= 1;
+    }
+  }
+
   float pressure = baro.getPressure();
   float altitude = getCurrentAltitude();
   float temperature = baro.getTemperature();
+  SerialBTS.write(altitude);
 
   if(altitude > 1000){
     ignite |= 4; //above 1000ft? set bit 3 high
   }
-  if(ignite >= 4){ // are bits 1 and or 3 high? proceed
+  if(ignite >= 4){ // are bits 3 and or 1 high? proceed
     if((altitude < 550) && (altitude > 400)){
       ignite |= 2; // in ejection altitude range? set bit 2 high
     }
@@ -96,19 +110,8 @@ void loop(){
   if(ignite == 7){ //are all 3 bits high? ignite the ematch
     digitalWrite(LED,HIGH);
     digitalWrite(ematch, HIGH);
-    SerialBTS.write("Ematch ignited ");
+    //SerialBTS.write("Ematch ignited ");
   }
-
-  SerialBTS.write("Ignite = ");
-  SerialBTS.write(ignite);
-  /*
-  Serial.print("Temperature = ");
-  Serial.print((int)temperature);
-  Serial.print("Altitude = ");
-  Serial.print((int)altitude);
-  Serial.print("Ignite = ");
-  Serial.print(ignite);
-  */
 }
 
 float getCurrentAltitude(){

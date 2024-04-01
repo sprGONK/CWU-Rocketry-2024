@@ -29,6 +29,7 @@
  */
 
 #include "Adafruit_MPL3115A2.h"
+#include <stdio.h>
 
 /*!
     @brief  Instantiates a new MPL3115A2 class
@@ -45,9 +46,9 @@ boolean Adafruit_MPL3115A2::begin(TwoWire *twoWire) {
   if (i2c_dev)
     delete i2c_dev;
   i2c_dev = new Adafruit_I2CDevice(MPL3115A2_ADDRESS, twoWire);
-  if (!i2c_dev->begin())
+  if (!i2c_dev->begin()){
     return false;
-
+  }
   // sanity check
   uint8_t whoami = read8(MPL3115A2_WHOAMI);
   if (whoami != 0xC4) {

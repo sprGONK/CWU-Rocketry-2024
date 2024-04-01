@@ -8,10 +8,22 @@ void setup(){
     pinMode(2,OUTPUT);
     Serial.begin(9600);
     while(!Serial);
-    Serial.flush();
 }
 void loop(){
-    digitalWrite(15,!digitalRead(15));
-    digitalWrite(2,!digitalRead(2));
-    delay(1000);
+    if (Serial.available() > 0) {
+
+
+    byte incomingByte = Serial.read();
+
+
+    switch (incomingByte){
+    case '0':
+      Serial.println("toggle");
+        digitalWrite(15,!digitalRead(15));
+        digitalWrite(2,!digitalRead(2));
+      break;
+    } //endswitch
+
+
+  }//enif
 }

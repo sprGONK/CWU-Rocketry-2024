@@ -3,5 +3,5 @@
     "board": "esp32:esp32:esp32doit-devkit-v1",
     "programmer": "esptool",
     "port": "COM5",
-    "sketch": "UpperPayload.ino"
+    "sketch": "ms5607_test.ino"
 }

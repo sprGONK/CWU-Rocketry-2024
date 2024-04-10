@@ -11,11 +11,7 @@ void setup(){
 }
 void loop(){
     if (Serial.available() > 0) {
-
-
     byte incomingByte = Serial.read();
-
-
     switch (incomingByte){
     case '0':
       Serial.println("toggle");
@@ -23,7 +19,5 @@ void loop(){
         digitalWrite(2,!digitalRead(2));
       break;
     } //endswitch
-
-
   }//enif
 }

@@ -102,8 +102,10 @@ void loop(){
     ignite |= 4; //above 1000ft? set bit 3 high
   }
   if(ignite >= 4){ // are bits 3 and or 1 high? proceed
-    if((altitude < 550) && (altitude > 400)){
+    if((altitude < 450) && (altitude > 400)){
       ignite |= 2; // in ejection altitude range? set bit 2 high
+    }else{
+      ignite = 4; //TODO: properly write setting bit 2 low
     }
   }
   

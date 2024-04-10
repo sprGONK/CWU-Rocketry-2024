@@ -23,11 +23,13 @@ int buffer;
 
 void loop()
 {
-  buffer = Serial.read();
-  XBee.write(buffer);
-  digitalWrite(LED,LOW);
-  Serial.println(buffer, HEX);
-  buffer = 0;
+  if(Serial.available()){
+    buffer = Serial.read();
+    XBee.write(buffer);
+    Serial.print(buffer);
+    buffer = 0;
+    delay(1000);
+  }
 }
 
 void IRAM_ATTR eject(){

@@ -19,10 +19,10 @@ public class logicTest{
         while(1==1){
             //ascending
             if(altitude<=5000&&apogee!=1){
-                altitude += 50;
                 if(altitude>=5000){//apogee reached
                     apogee = 1;
                 }
+                altitude += 50;
             }
             //falling back down
             if(apogee==1){
@@ -44,7 +44,7 @@ public class logicTest{
                     ignite |= 2; // in ejection altitude range? set bit 2 high
                 }
             }
-            System.out.println("Altitude = "+altitude+". Ignite command = "+convertIntegerToBinary(ignite));
+            System.out.println("Altitude = "+altitude+"ft. Ignite command = "+convertIntegerToBinary(ignite));
         }
     }
 }
